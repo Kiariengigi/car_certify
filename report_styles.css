@@ -21,6 +21,11 @@
   --border-radius: 8px;
 }
 
+p{
+  padding: 0;
+  margin: 0;
+}
+
 body {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   background-color: #f8f9fa;
@@ -85,7 +90,6 @@ header {
    Card Enhancements
    ============================================================================= */
 .card {
-  border: 1px solid var(--border-color);
   border-radius: var(--border-radius);
   box-shadow: var(--shadow-light);
   transition: var(--transition-smooth);
@@ -110,21 +114,37 @@ header {
   transform: scale(1.02);
 }
 
+.indicator_card{
+  margin-top: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  padding: 0.5rem 2rem 0.5rem 0.5rem;
+  background-color: lightgray;
+  border-radius: var(--border-radius);
+}
+
 /* =============================================================================
    Image Gallery and Thumbnails
    ============================================================================= */
 .img-thumbnail {
-  width: 80px;
-  height: 60px;
+  height: 6.5rem;
   object-fit: cover;
-  border: 2px solid var(--border-color);
   border-radius: var(--border-radius);
   transition: var(--transition-smooth);
-  cursor: pointer;
+}
+.img-thumbnail-2 {
+  width: 12rem;
+  height: 7rem;
+  object-fit: cover;
+  border-radius: var(--border-radius);
+  transition: var(--transition-smooth);
 }
 
 .img-thumbnail:hover {
-  border-color: var(--primary-color);
+  transform: scale(1.05);
+  box-shadow: var(--shadow-medium);
+}
+.img-thumbnail-2:hover {
   transform: scale(1.05);
   box-shadow: var(--shadow-medium);
 }

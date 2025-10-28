@@ -18,3 +18,18 @@ window.addEventListener("scroll", () => {
     }
     lastScroll = currentScroll
 })
+
+document.addEventListener("DOMContentLoaded", function(){
+    const navBar = document.getElementById('navBar')
+
+    navBar.addEventListener('click', function(event){
+        if (event.target.classList.contains('nav-link')){
+            const alllinks = navBar.querySelectorAll('.nav-link')
+            alllinks.forEach(link => {
+                link.classList.remove('active')
+            })
+
+            event.target.classList.add('active')
+        }
+    })
+})
