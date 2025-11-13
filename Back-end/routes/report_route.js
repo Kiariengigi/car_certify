@@ -1,8 +1,9 @@
 const express = require('express')
 const router = express.Router()
+const {retrieveMyReports, retrieveReport} = require('../Controllers/reportCTRL')
 
-router.get('/report/:id', reportCtrl.retrieveReport)
-router.get('/report/mine', reportCtrl.retrieveMyReports)
+router.get('/:id', retrieveReport)
+router.get('/mine', retrieveMyReports)
 
 
 module.exports = router
