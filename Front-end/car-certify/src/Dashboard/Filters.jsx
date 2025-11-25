@@ -6,7 +6,7 @@ import '../Styles/Filters_styles.css';
 
 function Filters() {
   const navigate = useNavigate();
-  const API_URL = "http://localhost:3542";
+  const API_URL = "https://car-certify.onrender.com";
 
   const [makes, setMakes] = useState([]);
   const [models, setModels] = useState([]);

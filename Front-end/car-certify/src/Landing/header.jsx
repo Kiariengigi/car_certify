@@ -22,7 +22,7 @@ function Header() {
   const [user, setUser] = useState(null);
 
   const navigate = useNavigate();
-  const API_URL = "http://localhost:3542";
+  const API_URL = "https://car-certify.onrender.com";
 
   // --- Modal handlers ---
   const openLoginModal = () => setLoginModalIsOpen(true);

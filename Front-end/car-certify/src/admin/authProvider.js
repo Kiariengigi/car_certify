@@ -1,6 +1,6 @@
 export const authProvider = {
     login: ({ username, password }) => {
-        return fetch('http://localhost:3542/users/login', {
+        return fetch('https://car-certify.onrender.com/users/login', {
             method: 'POST',
             body: JSON.stringify({ email: username, password }),
             headers: new Headers({ 'Content-Type': 'application/json' }),

@@ -1,7 +1,7 @@
 import { fetchUtils } from 'react-admin';
 import simpleRestProvider from 'ra-data-simple-rest';
 
-const apiUrl = 'http://localhost:3542/vehicleInfo';
+const apiUrl = 'https://car-certify.onrender.com/vehicleInfo';
 
 // HTTP client with JWT
 const httpClient = (url, options = {}) => {

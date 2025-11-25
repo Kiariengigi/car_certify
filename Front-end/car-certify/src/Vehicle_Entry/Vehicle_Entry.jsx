@@ -29,7 +29,7 @@ function Vehicle_Entry() {
   });
 
   const totalSteps = 4;
-  const API_URL = "http://localhost:3542";
+  const API_URL = "https://car-certify.onrender.com";
   const token = localStorage.getItem('token');
 
   const handleNext = () => {
