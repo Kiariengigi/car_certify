@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Title } from 'react-admin';
 import { Card, CardContent } from '@mui/material';  // <-- use MUI here
 import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import dataProvider from './dataProvider';
+import dataProvider from './DataProvider';
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#AA00FF'];
 
