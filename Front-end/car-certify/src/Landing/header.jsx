@@ -125,7 +125,16 @@ function Header() {
               <Nav.Link onClick={() => user ? handleLogout() : openLoginModal()}>
                 {user ? 'LOG OUT' : 'LOGIN'}
               </Nav.Link>
-              <Nav.Link className='signup bg-black text-white' onClick={user ? null : openSignUpModal}>
+              <Nav.Link
+                className='signup bg-black text-white'
+                onClick={() => {
+                  if (!user) return openSignUpModal();
+                  // If logged in and role is admin, go to admin area; otherwise go to home
+                  const role = user.role || localStorage.getItem('role');
+                  if (role === 'admin') navigate('/admin');
+                  else navigate('/home');
+                }}
+              >
                 {user ? `Welcome, ${user.email.split('@')[0]}` : 'SIGN UP'}
               </Nav.Link>
             </Nav>
