@@ -19,6 +19,9 @@ app.use(express.urlencoded({ limit: "50mb", extended: true}))
 app.use('/report', reportRoutes)
 app.use('/vehicleInfo', vehicleInfoRoute)
 app.use('/users', userRoutes)
+app.get('/', (req, res) => {
+  res.send('API is running...');
+});
 
 app.use((err, req, res, next) => {
   console.error('Error:', err);
