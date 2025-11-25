@@ -33,27 +33,6 @@ const vehicleSchema = new mongoose.Schema({
     },
   ],
 
-  // SERVICE REPORTS
-  serviceReports: [
-    {
-      date: { type: Date, required: true },
-      services: [
-        {
-          type: String,
-          enum: [
-            'Oil & Filter change',
-            'Tire rotation',
-            'Wheel Alignment',
-            'Engine & Cabin Air Filter replacement',
-            'Brake Fluid Exchange',
-            'Spark Plug Replacement',
-          ],
-          required: true,
-        },
-      ],
-    },
-  ],
-
   // ACCIDENT RECORDS
   accidentReports: [
     {
@@ -62,12 +41,12 @@ const vehicleSchema = new mongoose.Schema({
         type: String,
         enum: [
           'Minor damage',
-          'Functional Damage',
+          'Functional damage',
           'Disabling damage',
           'Write-off',
         ],
       },
-      location: [{ type: String, enum: ['Rear', 'Left side', 'Right side', 'Front'] }],
+      location: [{ type: String, enum: ['Rear', 'Left', 'Right', 'Front'] }],
     },
   ],
   user: {

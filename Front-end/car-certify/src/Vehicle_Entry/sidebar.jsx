@@ -16,10 +16,12 @@ function Sidebar({ currentStep, onStepChange }) {
       style={{ width: '250px', minHeight: '100vh' }}
     >
       {/* Logo */}
-      <div className="mb-4 text-center">
+      <a href='/' className=' text-decoration-none'>
+         <div className="mb-4 text-center">
         <img src={logo} alt="Logo" className="img-fluid mb-2" />
         <p className="small text-muted mb-0">Vehicle Entry Portal</p>
       </div>
+      </a>
 
       {/* Header */}
       <div className="mb-4">

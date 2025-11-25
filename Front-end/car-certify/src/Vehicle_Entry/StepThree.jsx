@@ -1,34 +1,190 @@
 import React, { useState } from 'react';
+import '../Styles/Step_Three.css';
 
-const StepThree = ({ size = '50%', className = '' }) => {
+const StepThree = ({ size = '50%', className = '', onDataChange, data, setData }) => {
   const [activePart, setActivePart] = useState(null);
+  const [tooltip, setTooltip] = useState({ visible: false, x: 0, y: 0 });
+  const [severities, setSeverities] = useState({});
+  const [newDamage, setNewDamage] = useState({ date: '', severity: '', location: '' });
+  const [loggedDamages, setLoggedDamages] = useState([]); // New state for summary
 
-  const PartGroup = ({ id, activePart, onSelect, children }) => {
-    const isActive = activePart === id;
+  const handleDamageChange = (field, value) => {
+    setNewDamage(prev => ({ ...prev, [field]: value }));
+  };
+
+ const handleSubmit = e => {
+  e.preventDefault();
+  if (!newDamage.date || !newDamage.severity || !newDamage.location) return;
+
+  const entry = {
+    id: Date.now(),
+    date: newDamage.date,
+    severity: newDamage.severity,
+    location: newDamage.location
+  };
+
+  // Update child local summary
+  setLoggedDamages(prev => [...prev, entry]);
+
+  // **Update parent**
+  setData(prev => ({
+    ...prev,
+    accidentReports: [...prev.accidentReports, entry]
+  }));
+
+  setNewDamage({ date: '', severity: '', location: '' });
+};
+
+
+
+  const severityColors = {
+    Minor_Damage: '#08CB00',
+    Functional_Damage: '#CFFF04',
+    Disabling_Damage: '#FFA239',
+    Write_Off: '#F93827'
+  };
+
+  const PartGroup = ({ id, children }) => {
+    const severity = severities[id];
+    const color = severity ? severityColors[severity] : (activePart === id ? 'black' : 'black');
+    const glow =
+      severity === 'Minor Damage'
+        ? '0 0 8px #08CB00'
+        : severity === 'Functional Damage'
+        ? '0 0 12px #CFFF04'
+        : severity === 'Disabling Damage'
+        ? '0 0 16px #FFA239'
+        : severity === 'Write-off'
+        ? '0 0 20px #F93827'
+        : 'none';
+
     const styles = {
       cursor: 'pointer',
-      stroke: isActive ? '#3b82f6' : (activePart ? '#e5e7eb' : 'currentColor'),
-      strokeWidth: isActive ? 3 : 2,
-      opacity: (activePart && !isActive) ? 0.3 : 1,
-      transition: 'all 0.3s ease',
-      filter: isActive ? 'drop-shadow(0 0 4px rgba(59, 130, 246, 0.5))' : 'none'
+      stroke: color,
+      strokeWidth: activePart === id ? 4 : 2,
+      opacity: activePart && activePart !== id ? 0.3 : 1,
+      filter: glow ? `drop-shadow(${glow})` : 'none',
+      transition: 'all 0.3s ease'
+    };
+
+    const handleClick = e => {
+      e.stopPropagation();
+      setActivePart(id);
+      setTooltip({ visible: true, x: e.clientX, y: e.clientY });
+      setNewDamage(prev => ({ ...prev, location: id }));
     };
 
     return (
-      <g onClick={(e) => { e.stopPropagation(); onSelect(isActive ? null : id); }} style={styles}>
-        {/* Thick transparent stroke for easier clicking */}
-        <g stroke="transparent" strokeWidth={30} fill="none">{children}</g>
+      <g onClick={handleClick} style={styles}>
+        <g stroke="transparent" strokeWidth={30} fill="none">
+          {children}
+        </g>
         {children}
       </g>
     );
   };
 
+  const handleSeveritySelect = level => {
+    setSeverities(prev => ({ ...prev, [activePart]: level }));
+    setNewDamage(prev => ({ ...prev, severity: level }));
+    setTooltip(prev => ({ ...prev, visible: false }));
+  };
+
+  const handleRemoveDamage = id => {
+  const removed = loggedDamages.find(d => d.id === id);
+
+  setLoggedDamages(prev => prev.filter(d => d.id !== id));
+
+  // Remove from parent
+  if (removed) {
+    setData(prev => ({
+      ...prev,
+      accidentReports: prev.accidentReports.filter(d => d.id !== id)
+    }));
+  }
+
+  if (removed?.location) {
+    setSeverities(prev => {
+      const newSeverities = { ...prev };
+      delete newSeverities[removed.location];
+      return newSeverities;
+    });
+  }
+};
+
   return (
-    <div className={`relative ${className}`}>
+    <div className={`relative ${className}`} onClick={() => setActivePart(null)}>
+      {tooltip.visible && (
+        <div
+          style={{
+            position: 'fixed',
+            top: tooltip.y + 10,
+            left: tooltip.x + 10,
+            background: 'white',
+            padding: '8px',
+            border: '1px solid #ccc',
+            borderRadius: '4px',
+            zIndex: 1000
+          }}
+        >
+          <div className="mb-1 font-bold">Select Severity</div>
+          {['Minor damage', 'Functional damage', 'Disabling damage', 'Write off'].map(level => (
+            <div key={level} style={{ display: 'inline-block', margin: '2px' }}>
+              <button
+                onClick={() => handleSeveritySelect(level)}
+                className="px-2 py-1 rounded"
+                style={{ backgroundColor: severityColors[level], color: 'white' }}
+                 value={newDamage.severity}
+                  onChange={(e) => handleDamageChange('severity', e.target.value)}
+              >
+                {level.toUpperCase()}
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+
       <div className="absolute top-0 left-0 p-4 pointer-events-none">
-        <h3 className="text-lg font-bold text-gray-800 bg-white/80 backdrop-blur px-2 rounded">
-          {activePart ? activePart.toUpperCase() : "SELECT ZONE"}
+        <h3 className="text-lg font-bold text-white-800 bg-white/80 backdrop-blur px-2 rounded">
+          {activePart ? activePart.toUpperCase() : 'SELECT ZONE'}
         </h3>
+      </div>
+
+      {/* Form for date input */}
+      <form onSubmit={handleSubmit} className="absolute bottom-4 left-4 bg-white p-3 rounded shadow">
+        <input
+          type="date"
+          value={newDamage.date}
+          onChange={e => handleDamageChange('date', e.target.value)}
+          className="border px-2 py-1 rounded mr-2"
+          required
+        />
+        <button type="submit" className="bg-blue-500 text-white px-3 py-1 rounded">
+          Add Damage
+        </button>
+      </form>
+
+      {/* Summary panel */}
+      <div className="absolute bottom-4 right-4 bg-white p-4 rounded shadow max-h-64 overflow-y-auto w-80">
+        <h4 className="font-bold mb-2">Damage Summary</h4>
+        {loggedDamages.length === 0 ? (
+          <p className="text-gray-500">No damages logged yet.</p>
+        ) : (
+          <ul>
+            {loggedDamages.map(d => (
+              <li key={d.id} className="mb-1">
+                <span className="font-semibold">{d.location.toUpperCase()}</span> — {d.date} —{' '}
+                <span style={{ color: severityColors[d.severity] }}>{d.severity.toUpperCase()}</span>
+                <button
+            onClick={() => handleRemoveDamage(d.id)}
+            className="ml-2 bg-red-500 text-white px-2 py-0.5 rounded text-xs"
+          >
+            Remove
+          </button>
+              </li>
+            ))}
+          </ul>
+        )}
       </div>
 
       <svg
@@ -43,7 +199,7 @@ const StepThree = ({ size = '50%', className = '' }) => {
       >
 
         {/* --- FRONT (Nose, Hood, Front Wheel) --- */}
-        <PartGroup id="front" activePart={activePart} onSelect={setActivePart}>
+        <PartGroup id="Front" activePart={activePart} onSelect={setActivePart}>
           <path d="M162.94,128.93c-16.06,18.99-24.18,42.1-31.06,65.15-11.36,38.07-16.52,77.45-14.11,117.19,3.18,52.58,15.02,103.02,42.85,148.69"/>
           <path d="M88.45,139.38c-9.48,9.24-12.49,21.3-15.22,33.66-3.1,14.03-7.69,27.75-10.23,41.86-6.77,37.64-12.32,75.43-5.98,113.8,3.9,23.61,7.01,47.39,11.9,70.8,3.45,16.55,13.93,29.47,26.43,40.79,6.28,5.69,11.72,12.3,17.54,18.5"/>
           <path d="M494.64,92.92c-48.89-.43-97.82,3.9-146.66-2.18-16.57-2.06-33.33-2.79-50.03-3.55-23.65-1.08-47.32-2.06-70.99-2.24-14.35-.11-28.75,2.5-43.05,1.9-21.37-.9-41.03,4.19-59.27,14.37-15.32,8.55-27.82,20.45-35.62,36.52l23.89-7.65"/>
@@ -71,7 +227,7 @@ const StepThree = ({ size = '50%', className = '' }) => {
         </PartGroup>
 
         {/* --- REAR (Bed, Tailgate, Rear Wheel) --- */}
-        <PartGroup id="rear" activePart={activePart} onSelect={setActivePart}>
+        <PartGroup id="Rear" activePart={activePart} onSelect={setActivePart}>
           <path d="M1017.22,400.72c-64.88,35.64-132.07,65.18-204.77,81.6-32.73,7.39-64.1,4.87-95.51-4.94-2.84-.89-5.71-1.7-8.57-2.55-.25,1.24-.5,2.47-.74,3.71h6.98"/>
           <path d="M1017.22,188.17c-58.39-31.24-118.54-57.82-182.56-76.1-28.01-8-55.7-12.64-83.89-8.17-22.53,3.58-44.36,11.68-66.4,18.15-8.7,2.55-17.1,6.11-25.63,9.2"/>
           <path d="M1020.71,193.97c15.03,39.77,18.55,81.22,16.01,123.1-1.53,25.27-6.27,50.19-14.6,74.44-5.52,16.05-10.23,32.25-20.03,46.38"/>
@@ -85,7 +241,7 @@ const StepThree = ({ size = '50%', className = '' }) => {
         </PartGroup>
 
         {/* --- LEFT (Cabin Body, Doors, Side Steps) --- */}
-        <PartGroup id="left" activePart={activePart} onSelect={setActivePart}>
+        <PartGroup id="Left" activePart={activePart} onSelect={setActivePart}>
           <path d="M662.24,133.57c20.56-5.42,41.11-10.87,61.69-16.24,4.54-1.18,9.16-2.06,13.57-3.04,12.47,18.57,18,37.89,22.49,57.6,13.47,59.08,9.98,119.17,8.73,178.86-.79,37.27-6.71,74.58-22.83,109.13-2.72,5.83-7.33,10.79-10.65,15.56-34.56-9.79-67.19-18.96-99.76-28.29-21.34-6.11-42.7-10.32-65.14-12.16-65.51-5.37-131-10.17-196.73-8.44-22.16,.58-44.28,4.03-66.34,6.79-21.01,2.64-42.04,5.41-62.82,9.38-21.89,4.19-43.61,9.42-65.18,15.02-30.44,7.91-60.12,9.39-88.48-7.08"/>
           <path d="M591.24,154.48c1.16,12,2.13,24.03,3.54,36,2.15,18.22,6.34,36.38,6.57,54.6,.46,35.99-.54,72.04-2.21,108-.95,20.58-4.49,41.04-6.69,61.58-.7,6.55-.82,13.16-1.21,19.74"/>
           <path d="M678.53,106.86c4.95-1.97,9.9-3.95,14.85-5.92,.16-1.28,.33-2.56,.49-3.85-11.32-9.13-22.33-18.7-34.16-27.12-3.28-2.33-8.99-1.27-16.04-2.03,4.44,9.74,7.39,16.22,10.89,23.92-3.48,.38-6.63,.99-9.78,1.02-45.39,.45-90.78,.94-136.17,.99-4.27,0-8.53-2.91-12.81-4.43-2.31-.82-4.6-1.8-6.99-2.29-15.21-3.15-30.48-6.41-44.22,4.61"/>
@@ -133,7 +289,7 @@ const StepThree = ({ size = '50%', className = '' }) => {
         </PartGroup>
 
         {/* --- RIGHT (Mapped to: FRAME / UNDERCARRIAGE) --- */}
-        <PartGroup id="right" activePart={activePart} onSelect={setActivePart}>
+        <PartGroup id="Right" activePart={activePart} onSelect={setActivePart}>
           {/* Main Chassis Rail Top */}
           <path d="M730.91,124.28c-31.81,8.52-63.65,16.93-95.42,25.61-11.72,3.2-23.26,7.02-36.4,11.02,16.02,88.5,16.59,177.55-.15,267.26,44.51,12.66,88.79,25.25,133.91,38.09,11.47-17.1,15.94-36.75,20.02-56.27,10.34-49.43,10.9-99.67,9.14-149.79-1.37-38.91-5.25-77.81-18.46-114.94-2.76-7.75-7.6-14.77-11.48-22.13"/>
           {/* Main Chassis Rail Bottom */}

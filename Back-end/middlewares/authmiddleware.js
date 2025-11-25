@@ -13,10 +13,17 @@ const protect = async (req, res, next) => {
     
     try{
         const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET)
-        req.user = await user.findById(decoded.id).select('-password')
+        const foundUser = await user.findById(decoded.id).select('-password')
+        if (!foundUser) return res.status(401).json({ message: 'User not found' });
+        req.user = foundUser;
         next()
+        console.log("PROTECT middleware activated")
+        console.log("Authorization header:", req.headers.authorization)
+
     } catch (err){
         res.status(401).json({message: 'Token invalid'})
+        console.error("AUTH ERROR:", err.message)
+        res.status(401).json({ message: "Not authorized" })
     }
 }
 

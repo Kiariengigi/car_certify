@@ -57,12 +57,20 @@ function Filters() {
           <h1 style={{fontSize: '4em'}}>Reports</h1>
           <p>Browse Reports</p>
         </div>
-        <Button 
+        <div className='d-flex gap-3'>
+           <Button 
           style={{width: '12rem', height: '3rem'}} 
           onClick={() => navigate('/')} 
           className='report_btn bg-black border-0'>
           Generate New Report
         </Button>
+        <Button 
+          style={{width: '12rem', height: '3rem'}} 
+          onClick={() => navigate('/new')} 
+          className='report_btn bg-black border-0'>
+          Enter New Vehicle
+        </Button>
+        </div>
       </div>
 
       <div className='d-flex w-100 justify-content-between p-5 border border-1 shadow rounded-5'>

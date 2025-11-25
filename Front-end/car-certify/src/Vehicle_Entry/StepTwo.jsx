@@ -1,69 +1,71 @@
 import React, { useState, useEffect } from 'react';
 import {
-  LineChart, Line, XAxis, YAxis,
-  CartesianGrid, Tooltip, ResponsiveContainer
+  LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer
 } from 'recharts';
-import { Car, Calendar, Plus, Trash2, TrendingUp, History, MapPin } from 'lucide-react';
+import { Car, Calendar, Plus, Trash2, TrendingUp } from 'lucide-react';
 
-function StepTwo() {
+function StepTwo({ data, setData }) {
+  const [newMileage, setNewMileage] = useState({ date: '', mileage: '' });
 
-  const [logs, setLogs] = useState(() => {
-    const saved = localStorage.getItem('mileageLogs');
-    return saved ? JSON.parse(saved) : [];
-  });
-
-  const [formData, setFormData] = useState({
-    mileage: '',
-    date: new Date().toISOString().split('T')[0],
-    note: ''
-  });
-
+  // Load persisted data on mount
   useEffect(() => {
-    localStorage.setItem('mileageLogs', JSON.stringify(logs));
-  }, [logs]);
+    const saved = localStorage.getItem('mileageReports');
+    if (saved) setData(prev => ({ ...prev, mileageReports: JSON.parse(saved) }));
+  }, [setData]);
 
-  const sortedLogs = [...logs].sort((a, b) => new Date(a.date) - new Date(b.date));
-  const currentMileage = sortedLogs.length ? sortedLogs[sortedLogs.length - 1].mileage : 0;
-  const totalEntries = logs.length;
+  // Persist mileageReports whenever updated
+  useEffect(() => {
+    localStorage.setItem('mileageReports', JSON.stringify(data.mileageReports));
+  }, [data.mileageReports]);
+
+  const handleMileageChange = (field, value) => {
+    setNewMileage(prev => ({ ...prev, [field]: value }));
+  };
+
+  const handleSubmit = e => {
+    e.preventDefault();
+    if (!newMileage.date || !newMileage.mileage) return;
+
+    const entry = {
+      id: Date.now(),
+      date: newMileage.date,
+      mileage: Number(newMileage.mileage)
+    };
+
+    setData(prev => ({
+      ...prev,
+      mileageReports: [...prev.mileageReports, entry]
+    }));
+
+    setNewMileage({ date: '', mileage: '' });
+  };
+
+  const deleteLog = id => {
+    setData(prev => ({
+      ...prev,
+      mileageReports: prev.mileageReports.filter(log => log.id !== id)
+    }));
+  };
+
+  const sortedLogs = [...data.mileageReports].sort(
+    (a, b) => new Date(a.date) - new Date(b.date)
+  );
 
   const chartData = sortedLogs.map(log => ({
     date: new Date(log.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
     mileage: log.mileage
   }));
 
-  const handleInputChange = e => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
-
-  const handleSubmit = e => {
-    e.preventDefault();
-
-    if (!formData.mileage || !formData.date) return;
-
-    const newLog = {
-      id: Date.now(),
-      mileage: Number(formData.mileage),
-      date: formData.date,
-      note: formData.note
-    };
-
-    setLogs([...logs, newLog]);
-    setFormData({ mileage: '', note: '', date: formData.date });
-  };
-
-  const deleteLog = id => {
-    setLogs(logs.filter(log => log.id !== id));
-  };
+  const currentMileage = sortedLogs.length ? sortedLogs[sortedLogs.length - 1].mileage : 0;
 
   return (
-    <div className="w-100 py-4" style={{width: '100%'}}>
+    <div className="w-100 py-4">
 
-      {/* HEADER */}
+      {/* Header */}
       <div className="d-flex justify-content-between align-items-center mb-4">
         <div>
           <h2 className="fw-bold d-flex align-items-center gap-2">
-            <Car size={28} className="text-primary" />
-            Vehicle Mileage Log
+            <Car size={28} className="text-primary" /> Vehicle Mileage Log
           </h2>
           <small className="text-muted">Track your odometer readings and usage trends.</small>
         </div>
@@ -77,14 +79,12 @@ function StepTwo() {
 
       <div className="row g-4">
 
-        {/* LEFT: FORM */}
+        {/* Form */}
         <div className="col-lg-4">
           <div className="card shadow-sm">
             <div className="card-body">
-
               <h5 className="fw-semibold d-flex align-items-center gap-2 mb-3">
-                <Plus size={18} className="text-primary" />
-                Log New Entry
+                <Plus size={18} className="text-primary" /> Log New Entry
               </h5>
 
               <form onSubmit={handleSubmit} className="vstack gap-3">
@@ -100,8 +100,8 @@ function StepTwo() {
                       type="date"
                       name="date"
                       className="form-control"
-                      value={formData.date}
-                      onChange={handleInputChange}
+                      value={newMileage.date}
+                      onChange={(e) => handleMileageChange('date', e.target.value)}
                       required
                     />
                   </div>
@@ -116,50 +116,46 @@ function StepTwo() {
                       type="number"
                       name="mileage"
                       className="form-control"
-                      value={formData.mileage}
-                      onChange={handleInputChange}
+                      value={newMileage.mileage}
+                      onChange={(e) => handleMileageChange('mileage', e.target.value)}
                       placeholder="45000"
                       required
                     />
                   </div>
                 </div>
 
-                {/* Submit */}
-                <button className="btn btn-primary w-100 fw-semibold">
-                  Save Entry
-                </button>
+                <button className="btn btn-primary w-100 fw-semibold">Save Entry</button>
               </form>
-
             </div>
           </div>
-          <button
-  className="btn btn-danger mt-3"
-  onClick={() => {
-    if (logs.length === 0) return;
-    const updated = [...logs];
-    updated.pop(); // remove last entry
-    setLogs(updated);
-  }}
->
-  Delete Last Log
-</button>
 
+          {/* Delete last log */}
+          <button
+            className="btn btn-danger mt-3"
+            onClick={() => {
+              if (data.mileageReports.length === 0) return;
+              setData(prev => ({
+                ...prev,
+                mileageReports: prev.mileageReports.slice(0, -1)
+              }));
+            }}
+          >
+            Delete Last Log
+          </button>
         </div>
 
-        {/* RIGHT: CHART + HISTORY */}
+        {/* Chart + History */}
         <div className="col-lg-8 vstack gap-4">
 
-          {/* CHART */}
+          {/* Chart */}
           <div className="card shadow-sm">
             <div className="card-body">
-
               <h5 className="fw-semibold d-flex align-items-center gap-2 mb-3">
-                <TrendingUp size={18} className="text-primary" />
-                Mileage Trend
+                <TrendingUp size={18} className="text-primary" /> Mileage Trend
               </h5>
 
               <div style={{ height: "300px" }}>
-                {logs.length > 1 ? (
+                {data.mileageReports.length > 1 ? (
                   <ResponsiveContainer width="100%" height="100%">
                     <LineChart data={chartData}>
                       <CartesianGrid strokeDasharray="3 3" />
@@ -176,10 +172,9 @@ function StepTwo() {
                   </div>
                 )}
               </div>
-
             </div>
           </div>
-          
+
         </div>
 
       </div>

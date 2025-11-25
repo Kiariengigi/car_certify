@@ -4,6 +4,7 @@ import Landing from './Landing/landing.jsx'
 import Home from './Dashboard/home.jsx'
 import VehicleReport from './Report/VehicleReport.jsx'
 import VehicleEntry from './Vehicle_Entry/Vehicle_Entry.jsx'
+import AdminApp from './admin/AdminApp.jsx'
 
 const App = () => {
   return (
@@ -14,6 +15,7 @@ const App = () => {
         <Route path='/home' element={<Home/>}></Route>
         <Route path='/report' element={<VehicleReport/>}></Route>
         <Route path='/new' element={<VehicleEntry/>}></Route>
+        <Route path='/admin/*' element={<AdminApp/>}></Route>
       </Routes>
       </BrowserRouter>
     </div>

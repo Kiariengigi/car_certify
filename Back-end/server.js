@@ -4,7 +4,6 @@ const connectDB = require('./db/connection')
 const express = require('express')
 const cors = require('cors')
 
-const adminRoutes = require('./routes/admin_routes')
 const reportRoutes = require('./routes/report_route')
 const vehicleInfoRoute = require('./routes/vehicle_info_route')
 const userRoutes = require('./routes/userRoutes')
@@ -12,10 +11,11 @@ const PORT = process.env.PORT
 const app = express()
 connectDB(process.env.MONGO_URI)
 
-app.use(cors())
-app.use(express.json())
-app.use(express.urlencoded({ extended: true}))
-app.use('/admin', adminRoutes)
+app.use(cors({
+  exposedHeaders: ["Content-Range"]
+}))
+app.use(express.json({ limit: "50mb" }))
+app.use(express.urlencoded({ limit: "50mb", extended: true}))
 app.use('/report', reportRoutes)
 app.use('/vehicleInfo', vehicleInfoRoute)
 app.use('/users', userRoutes)
@@ -26,6 +26,7 @@ app.use((err, req, res, next) => {
     success: false,
     message: err.message || 'Internal Server Error',
   });
+  res.header("Access-Control-Expose-Headers", "Content-Range")
 });
 
 app.listen(PORT, () => {

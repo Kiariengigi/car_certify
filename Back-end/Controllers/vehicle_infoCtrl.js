@@ -55,13 +55,90 @@ exports.saveVeh = async (req, res) => {
   }
 };
 exports.getVehiclesData = async (req, res) => {
-    try{
-        const vehicles = await Vehicle.find({ user: req.user._id}).select('make -_id')
+    try {
+        console.log("Inside getVehiclesData")
+        console.log("req.user:", req.user)
+        let query = {};
 
-        const makes = [...new Set(vehicles.map(v => v.make))]
+        const vehicles = await Vehicle.find(query);
 
-        res.status(200).json({ success: true, data: makes})
+        const total = await Vehicle.countDocuments(query);
+
+        res.set("Access-Control-Expose-Headers", "Content-Range");
+        res.set("Content-Range", `vehicles 0-${vehicles.length}/${total}`);
+
+        const formatted = vehicles.map(v => {
+  // convert the main vehicle doc to plain object
+  const vehicleObj = v.toObject();  
+  const { _id, mileageReports, accidentReports, ...rest } = vehicleObj;
+
+  const mileage = (mileageReports || []).map(m => ({
+    id: m._id,  // just use _id directly
+    ...m
+  }));
+
+  const accidents = (accidentReports || []).map(a => ({
+    id: a._id,
+    ...a
+  }));
+
+  return {
+    id: _id,
+    ...rest,
+    mileageReports: mileage,
+    accidentReports: accidents
+  };
+});
+
+
+        return res.status(200).json({ data: formatted, total });
+
     } catch (err) {
-        res.status(500).json({ success: false, message: err.message})
+        return res.status(500).json({ error: err.message });
     }
-}
+};
+
+
+exports.getSingleVehicle = async (req, res) => {
+    try {
+        const vehicle = await Vehicle.findById(req.params.id);
+
+        if (!vehicle) {
+            return res.status(404).json({ error: "No vehicle" });
+        }
+
+        const { _id, ...rest } = vehicle._doc;  // REMOVE _id
+
+        return res.json({
+            data: {
+                id: _id,
+                ...rest
+            }
+        });
+
+    } catch (err) {
+        return res.status(500).json({ error: "Failed to fetch vehicle" });
+    }
+};
+
+// controllers/vehicle_infoCtrl.js
+
+exports.getDashboardData = async (req, res) => {
+  try {
+    const totalVehicles = await Vehicle.countDocuments();
+    
+    // Count of vehicles by make
+    const makes = await Vehicle.aggregate([
+      { $group: { _id: "$make", count: { $sum: 1 } } },
+      { $sort: { count: -1 } }
+    ]);
+
+    res.json({
+      totalVehicles,
+      makes 
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+

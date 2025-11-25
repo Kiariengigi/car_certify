@@ -1,41 +1,47 @@
 import React, { useState } from 'react';
 import { CloudUpload, Trash2 } from 'lucide-react';
-import { Container, Row, Col, Card, Button, ProgressBar, Form } from 'react-bootstrap';
+import { Container, Card, Button, Form } from 'react-bootstrap';
 
-const StepFour = () => {
+const StepFour = ({ data, setData }) => {
   const [files, setFiles] = useState([]);
-  const [uploadProgress, setUploadProgress] = useState({});
 
-  // Handle file selection
   const handleFilesChange = (e) => {
-    const newFiles = Array.from(e.target.files).map((file) => ({
+    const newFiles = Array.from(e.target.files).map(file => ({
       file,
       preview: URL.createObjectURL(file),
-      progress: 0,
+      progress: 0
     }));
-    setFiles((prev) => [...prev, ...newFiles]);
-    newFiles.forEach((f) => simulateUpload(f));
+
+    setFiles(prev => [...prev, ...newFiles]);
+
+    // Only update the image array in parent
+    setData(prevData => ({
+      ...prevData,
+      image: [...prevData.image, ...newFiles.map(f => f.file)]
+    }));
+
+    newFiles.forEach(f => simulateUpload(f));
   };
 
-  // Simulate upload progress
   const simulateUpload = (fileObj) => {
     const interval = setInterval(() => {
-      setFiles((prevFiles) =>
-        prevFiles.map((f) => {
-          if (f === fileObj) {
-            const newProgress = f.progress + 5;
-            return { ...f, progress: newProgress >= 100 ? 100 : newProgress };
-          }
-          return f;
-        })
+      setFiles(prevFiles =>
+        prevFiles.map(f =>
+          f === fileObj
+            ? { ...f, progress: Math.min(f.progress + 5, 100) }
+            : f
+        )
       );
     }, 100);
-    setTimeout(() => clearInterval(interval), 2200); // Stop after 2.2s
+    setTimeout(() => clearInterval(interval), 2200);
   };
 
-  // Remove a file
   const removeFile = (fileObj) => {
-    setFiles((prev) => prev.filter((f) => f !== fileObj));
+    setFiles(prev => prev.filter(f => f !== fileObj));
+    setData(prevData => ({
+      ...prevData,
+      image: prevData.image.filter(f => f !== fileObj.file)
+    }));
   };
 
   return (
@@ -45,8 +51,7 @@ const StepFour = () => {
         <p className="text-muted">Upload images to preview them below.</p>
       </div>
 
-      <Card className="p-3 shadow-lg rounded-4 w-100" style={{ Width: '100%' }}>
-        {/* Drop Zone */}
+      <Card className="p-3 shadow-lg rounded-4 w-100">
         <Form.Group className="text-center mb-4">
           <Form.Label
             className="d-block p-4 mb-0 bg-light rounded-4 border-2"
@@ -67,7 +72,6 @@ const StepFour = () => {
           </Form.Label>
         </Form.Group>
 
-        {/* Uploaded Files */}
         <div className="mb-3">
           {files.map((f, index) => (
             <Card key={index} className="mb-2 p-2 d-flex align-items-center justify-content-between shadow-sm">
