@@ -8,7 +8,10 @@
     "build": "vite build",
     "start": "node server.js",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "cypress:open": "cypress open",
+    "cypress:run": "cypress run",
+    "test:auth": "cypress run --spec 'cypress/e2e/auth/**/*.cy.js'"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",
@@ -18,9 +21,11 @@
     "@fortawesome/free-solid-svg-icons": "^7.1.0",
     "@fortawesome/react-fontawesome": "^3.1.0",
     "@mui/material": "^7.3.5",
+    "@react-oauth/google": "^0.12.2",
     "@tailwindcss/vite": "^4.1.17",
     "axios": "^1.13.2",
     "bootstrap": "^5.3.8",
+    "jwt-decode": "^4.0.0",
     "lucide-react": "^0.554.0",
     "ra-data-simple-rest": "^5.13.1",
     "react": "^19.2.0",
@@ -38,6 +43,7 @@
     "@vitejs/plugin-react": "^5.1.0",
     "autoprefixer": "^10.4.22",
     "babel-plugin-react-compiler": "^1.0.0",
+    "cypress": "^13.14.0",
     "eslint": "^9.39.1",
     "eslint-plugin-react-hooks": "^7.0.1",
     "eslint-plugin-react-refresh": "^0.4.24",

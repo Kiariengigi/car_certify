@@ -2,12 +2,11 @@ const express = require('express')
 const router = express.Router()
 const upload = require('../middlewares/uploadImage')
 const Vehicle = require('../Models/vehicle')
-const { fetch_decode, genNewReport, retrieve_report, saveVeh, getVehiclesData, getSingleVehicle, getDashboardData} = require('../Controllers/vehicle_infoCtrl')
+const { fetch_decode, retrieve_report, saveVeh, getVehiclesData, getSingleVehicle, getDashboardData} = require('../Controllers/vehicle_infoCtrl')
 const { protect } = require('../middlewares/authmiddleware')
 
 // Vehicle routes
 router.post('/decode', fetch_decode)
-router.post('/report', genNewReport)
 router.get('/history', protect, retrieve_report)
 router.post('/new', protect, upload.array('image', 5), saveVeh)
 router.get('/vehicles', protect, getVehiclesData)

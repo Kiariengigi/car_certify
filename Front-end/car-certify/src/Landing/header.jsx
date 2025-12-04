@@ -5,12 +5,17 @@ import Modal from 'react-modal';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEnvelope, faKey } from "@fortawesome/free-solid-svg-icons";
 import axios from 'axios';
+import { GoogleLogin } from '@react-oauth/google';
+import { jwtDecode } from "jwt-decode";
 
 import logo from '../../../Images/logo.png';
 import Google from '../assets/Google.png';
 import loginCar from '../assets/loginCar.jpg';
 import SignUpcar from '../assets/SignUp.jpg';
 import '../Styles/Header_styles.css';
+
+// Fix for react-modal accessibility warning
+Modal.setAppElement('#root');
 
 function Header() {
   const [loginModalIsOpen, setLoginModalIsOpen] = useState(false);
@@ -30,15 +35,42 @@ function Header() {
   const openSignUpModal = () => setSignUpModalIsOpen(true);
   const closeSignUpModal = () => setSignUpModalIsOpen(false);
 
-  // --- Handle login state ---
+  // --- Handle Global Login State ---
   const handleLogin = (userData, token, redirect = true) => {
     if (token) localStorage.setItem('token', token);
     localStorage.setItem('user', JSON.stringify(userData));
+    
+    // Set state to update UI immediately
     setUser(userData);
 
-    localStorage.removeItem('vehicleData')
-    localStorage.removeItem('vehicleStep')
+    localStorage.removeItem('vehicleData');
+    localStorage.removeItem('vehicleStep');
+    
     if (redirect) navigate('/home');
+  };
+
+  // --- Handle Google Success ---
+  const handleGoogleSuccess = async (credentialResponse) => {
+    try {
+      // Send the token to YOUR backend
+      const response = await axios.post(
+        `${API_URL}/googlelogin`, // Create this route in your backend
+        { token: credentialResponse.credential }
+      );
+
+      const { user: userData, token } = response.data;
+
+      // Close Modals
+      setLoginModalIsOpen(false);
+      setSignUpModalIsOpen(false);
+
+      // Log the user in using your existing logic
+      handleLogin(userData, token, true);
+
+    } catch (error) {
+      console.error("Google Login Error", error);
+      alert("Google Sign In failed on server.");
+    }
   };
 
   const handleLogout = () => {
@@ -50,7 +82,7 @@ function Header() {
     navigate('/');
   };
 
-  // --- Signup ---
+  // --- Signup (Standard) ---
   const createUser = async (e) => {
     e.preventDefault();
     if (password !== confirmPass) return alert("Passwords do not match");
@@ -67,7 +99,7 @@ function Header() {
     }
   };
 
-  // --- Login ---
+  // --- Login (Standard) ---
   const loginUser = async (e) => {
     e.preventDefault();
     try {
@@ -89,6 +121,7 @@ function Header() {
     if (savedUser) handleLogin(savedUser, token, false);
   }, []);
 
+
   // --- Modal styles ---
   const firstStyles = {
     content: {
@@ -106,7 +139,10 @@ function Header() {
       gap: '2rem',
       overflowY: 'hidden',
     },
-    overlay: { backgroundColor: 'rgba(0,0,0,0.4)' },
+    overlay: { 
+      backgroundColor: 'rgba(0,0,0,0.4)',
+      zIndex: 1000 
+    },
   };
 
   return (
@@ -121,21 +157,25 @@ function Header() {
           <Navbar.Collapse id='basic-navbar-nav' className='justify-content-end'>
             <Nav>
               <Nav.Link onClick={() => user ? navigate('/home') : openLoginModal()}>HOME</Nav.Link>
-              <Nav.Link>SAMPLE-REPORT</Nav.Link>
+              <Nav.Link onClick={() => navigate('/report-sample')}>SAMPLE-REPORT</Nav.Link>
+              
               <Nav.Link onClick={() => user ? handleLogout() : openLoginModal()}>
                 {user ? 'LOG OUT' : 'LOGIN'}
               </Nav.Link>
+              
               <Nav.Link
                 className='signup bg-black text-white'
                 onClick={() => {
                   if (!user) return openSignUpModal();
-                  // If logged in and role is admin, go to admin area; otherwise go to home
-                  const role = user.role || localStorage.getItem('role');
-                  if (role === 'admin') navigate('/admin');
+                  const userRole = user.role || localStorage.getItem('role');
+                  if (userRole === 'admin') navigate('/admin');
                   else navigate('/home');
                 }}
               >
-                {user ? `Welcome, ${user.email.split('@')[0]}` : 'SIGN UP'}
+                {/* Updated to check for name first, then fallback to email split */}
+                {user 
+                  ? `Welcome, ${user.name || user.email.split('@')[0]}` 
+                  : 'SIGN UP'}
               </Nav.Link>
             </Nav>
           </Navbar.Collapse>
@@ -156,7 +196,15 @@ function Header() {
               <InputGroup.Text><FontAwesomeIcon icon={faKey} /></InputGroup.Text>
               <FormControl type='password' value={password} onChange={e => setPassword(e.target.value)} placeholder="Password" />
             </InputGroup>
-            <Button className='mt-3 w-100 rounded-pill' type="submit">Login</Button>
+            <Button className='mt-3 mb-3 w-100 rounded-pill' type="submit">Login</Button>
+            
+            {/* GOOGLE LOGIN BUTTON */}
+            <div className="d-flex justify-content-center">
+                <GoogleLogin 
+                    onSuccess={handleGoogleSuccess}
+                    onError={() => console.log('Login Failed')}
+                />
+            </div>
           </form>
         </div>
         <div style={{
@@ -191,7 +239,15 @@ function Header() {
               <option value="Buyer">Buyer</option>
               <option value="Dealership">Dealership</option>
             </Form.Select>
-            <Button className='mt-3 w-100 rounded-pill' type="submit">Sign Up</Button>
+            <Button className='mt-3 mb-3 w-100 rounded-pill' type="submit">Sign Up</Button>
+            
+             {/* GOOGLE SIGNUP BUTTON */}
+             <div className="d-flex justify-content-center">
+                <GoogleLogin 
+                    onSuccess={handleGoogleSuccess}
+                    onError={() => console.log('Login Failed')}
+                />
+            </div>
           </form>
         </div>
         <div style={{

@@ -1,7 +1,7 @@
 import React from "react";
 import { Card } from "react-bootstrap";
 
-const Mileage = () => {
+const Mileage = ({mileageHistory = [], currentMileage}) => {
   return (
     <section id="mileage" className="mb-5 d-flex gap-4">
       <div>
@@ -11,9 +11,8 @@ const Mileage = () => {
         <Card className="mb-3">
           <Card.Body>
             <ul className="mb-0">
-              <li>Current odometer: 120,000 km</li>
+              <li>Current odometer: {currentMileage} km</li>
               <li>Average yearly: 20,000 km</li>
-              <li>Last service check: 5,000 km ago</li>
             </ul>
           </Card.Body>
         </Card>

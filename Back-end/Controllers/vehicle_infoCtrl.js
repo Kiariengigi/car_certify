@@ -3,7 +3,7 @@ exports.fetch_decode = async (req, res) => {
     res.send('vehichle info controller works 1')
 }
 exports.genNewReport = async (req, res) => {
-    res.send('vehichle info controller works 1')
+    
 }
 exports.retrieve_report = async (req, res) => {
     try{

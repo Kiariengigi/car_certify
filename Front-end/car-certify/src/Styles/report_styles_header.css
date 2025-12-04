@@ -1,28 +1,19 @@
+/* report_styles_header.css */
 .floating-header {
-  position: fixed;
-  top: 1rem;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 80%;
-  max-width: 900px;
-  padding: 1rem 2rem;
-  background: rgba(255, 255, 255, 0.6);
-  backdrop-filter: blur(10px);
-  border-radius: 12px;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-  z-index: 1000;
-  transition: top 0.3s ease, transform 0.3s ease, width 0.3s ease, padding 0.3s ease, opacity 0.3s ease;
+  top: 0;
+  left: 0;
+  z-index: 1030;
+  background-color: white;
+  transition: transform 0.3s ease-in-out;
 }
 
-/* Hide header when scrolling down */
+/* This effectively replaces "translate-y-[-100%]" */
 .floating-header.hide {
-  top: -120px; /* moves header offscreen */
-  opacity: 0;
+  transform: translateY(-100%);
 }
 
-/* Shrink header when scrolling */
 .floating-header.shrink {
-  width: 70%;
-  padding: 0.5rem 1.5rem;
-  transform: translateX(-50%) scale(0.95);
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+  opacity: 0.95;
 }

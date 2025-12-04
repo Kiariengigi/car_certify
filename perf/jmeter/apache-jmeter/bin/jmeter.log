@@ -1,0 +1,20 @@
+2025-11-27 10:39:21,915 INFO o.a.j.u.JMeterUtils: Setting Locale to en_EN
+2025-11-27 10:39:21,970 INFO o.a.j.JMeter: Loading user properties from: user.properties
+2025-11-27 10:39:21,972 INFO o.a.j.JMeter: Loading system properties from: system.properties
+2025-11-27 10:39:21,994 INFO o.a.j.JMeter: Copyright (c) 1998-2024 The Apache Software Foundation
+2025-11-27 10:39:21,994 INFO o.a.j.JMeter: Version 5.6.3
+2025-11-27 10:39:21,995 INFO o.a.j.JMeter: java.version=23.0.2
+2025-11-27 10:39:21,995 INFO o.a.j.JMeter: java.vm.name=Java HotSpot(TM) 64-Bit Server VM
+2025-11-27 10:39:21,995 INFO o.a.j.JMeter: os.name=Windows 11
+2025-11-27 10:39:21,995 INFO o.a.j.JMeter: os.arch=amd64
+2025-11-27 10:39:21,995 INFO o.a.j.JMeter: os.version=10.0
+2025-11-27 10:39:21,995 INFO o.a.j.JMeter: file.encoding=UTF-8
+2025-11-27 10:39:21,996 INFO o.a.j.JMeter: java.awt.headless=null
+2025-11-27 10:39:21,996 INFO o.a.j.JMeter: Max memory     =1073741824
+2025-11-27 10:39:21,996 INFO o.a.j.JMeter: Available Processors =16
+2025-11-27 10:39:22,024 INFO o.a.j.JMeter: Default Locale=English (EN)
+2025-11-27 10:39:22,025 INFO o.a.j.JMeter: JMeter  Locale=English (EN)
+2025-11-27 10:39:22,025 INFO o.a.j.JMeter: JMeterHome=C:\Users\ngigi\OneDrive\Documents\Mid term project\car_certify-1\perf\jmeter\apache-jmeter
+2025-11-27 10:39:22,025 INFO o.a.j.JMeter: user.dir  =C:\Users\ngigi\OneDrive\Documents\Mid term project\car_certify-1\perf\jmeter\apache-jmeter\bin
+2025-11-27 10:39:22,026 INFO o.a.j.JMeter: PWD       =C:\Users\ngigi\OneDrive\Documents\Mid term project\car_certify-1\perf\jmeter\apache-jmeter\bin
+2025-11-27 10:39:22,029 INFO o.a.j.JMeter: IP: 192.168.100.69 Name: Kiarie FullName: host.docker.internal

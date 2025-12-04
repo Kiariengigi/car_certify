@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const User = require("../Models/user");
 const Joi = require("joi");
-const { signUp, login } = require('../Controllers/authCTRL')
+const { signUp, login, googleLogin } = require('../Controllers/authCTRL')
 const validate = require('../middlewares/validateUser')
 
 // Add new user
@@ -19,5 +19,6 @@ const loginSchema = Joi.object({
 
 router.post('/new', validate(newUserSchema), signUp)
 router.post('/login', validate(loginSchema), login)
+router.post('/googlelogin', googleLogin)
 
 module.exports = router;
