@@ -4,8 +4,36 @@ import StepTwo from './StepTwo';
 import StepThree from './StepThree';
 import StepFour from './StepFour';
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+
+// Simple Spinner Component for the loading screen
+const LoadingOverlay = () => (
+  <div style={{
+    position: 'fixed',
+    top: 0,
+    left: 0,
+    width: '100%',
+    height: '100%',
+    backgroundColor: 'rgba(255, 255, 255, 0.9)', // White with slight transparency
+    zIndex: 9999,
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'center',
+    alignItems: 'center'
+  }}>
+    <div className="spinner-border text-primary" role="status" style={{ width: '3rem', height: '3rem' }}>
+      <span className="visually-hidden">Loading...</span>
+    </div>
+    <h4 className="mt-3 text-dark">Saving Vehicle & Generating Report...</h4>
+    <p className="text-muted">Please wait, this may take a moment.</p>
+  </div>
+);
 
 function Vehicle_Entry() {
+  const navigate = useNavigate();
+  // New state to track submission status
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  
   const [currentStep, setCurrentStep] = useState(() => {
     const savedStep = localStorage.getItem("vehicleStep");
     return savedStep ? Number(savedStep) : 1;
@@ -29,7 +57,7 @@ function Vehicle_Entry() {
   });
 
   const totalSteps = 4;
-  const API_URL = "https://car-certify.onrender.com";
+  const API_URL = "http://localhost:3542";
   const token = localStorage.getItem('token');
 
   const handleNext = () => {
@@ -63,12 +91,16 @@ function Vehicle_Entry() {
         && vehicleData.year
         && vehicleData.engine.trim()
         && vehicleData.fuel
-        && vehicleData.transmission;
+        && vehicleData.transmission
+        && vehicleData.engineCC;
     }
     return true;
   };
 
   const handleSubmit = async () => {
+    // 1. Activate Loading Screen
+    setIsSubmitting(true);
+
     const form = new FormData();
     Object.entries(vehicleData).forEach(([key, value]) => {
       if (key === "image") value.forEach(file => form.append("image", file));
@@ -76,7 +108,13 @@ function Vehicle_Entry() {
       else form.append(key, value);
     });
 
+    console.log("--- SUBMITTING ---");
+    for (var pair of form.entries()) {
+      console.log(pair[0] + ', ' + pair[1]);
+    }
+
     try {
+      // 2. Submit Vehicle Data
       const response = await fetch(`${API_URL}/vehicleInfo/new`, {
         method: "POST",
         headers: { Authorization: `Bearer ${token}` },
@@ -86,16 +124,36 @@ function Vehicle_Entry() {
       if (!response.ok) {
         const errorText = await response.text();
         alert("Server Error: " + errorText);
+        setIsSubmitting(false); // Stop loading if error
         return;
       }
 
       const data = await response.json();
       console.log("Vehicle saved:", data);
+
+      // 3. Generate Report
+      await fetch("http://localhost:3542/report/genReport", {
+        method: "POST",
+        body: JSON.stringify({ numPlate: vehicleData.numPlate }),
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`
+        },
+      });
+
+      // 4. Cleanup & Navigate
       localStorage.removeItem("vehicleData");
       localStorage.removeItem("vehicleStep");
-      alert("Vehicle saved successfully!");
+      localStorage.setItem("numPlate", vehicleData.numPlate);
+
+      // Note: We don't set setIsSubmitting(false) here because we want
+      // the screen to stay visible until the page physically changes.
+      navigate("/report");
+
     } catch (err) {
       console.error("Submit error:", err);
+      alert("An unexpected error occurred.");
+      setIsSubmitting(false); // Stop loading if crash
     }
   };
 
@@ -109,6 +167,10 @@ function Vehicle_Entry() {
 
   return (
     <div className='d-flex p-4 gap-4' style={{ height: '100vh' }}>
+      
+      {/* SHOW LOADING OVERLAY IF SUBMITTING */}
+      {isSubmitting && <LoadingOverlay />}
+
       <Sidebar currentStep={currentStep} />
       <div className='flex-grow-1 w-100 overflow-auto'>
         {/* Progress */}
@@ -126,17 +188,28 @@ function Vehicle_Entry() {
         {renderStep()}
 
         <div className="d-flex justify-content-between align-items-center border-top p-3 bg-white">
-          <button className="btn btn-dark d-flex align-items-center" onClick={handlePrevious}>
+          <button 
+            className="btn btn-dark d-flex align-items-center" 
+            onClick={handlePrevious}
+            disabled={isSubmitting} // Disable buttons while submitting
+          >
             <svg className="me-2" width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
             </svg>
             Previous
           </button>
-          <button className={`btn d-flex align-items-center ${currentStep === totalSteps ? 'btn-success' : 'btn-dark'}`} onClick={handleNext}>
-            Next
-            <svg className="ms-2" width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 5l7 7m0 0l-7 7m7-7H3" />
-            </svg>
+          
+          <button 
+            className={`btn d-flex align-items-center ${currentStep === totalSteps ? 'btn-success' : 'btn-dark'}`} 
+            onClick={handleNext}
+            disabled={isSubmitting} // Disable buttons while submitting
+          >
+            {isSubmitting ? 'Saving...' : 'Next'}
+            {!isSubmitting && (
+              <svg className="ms-2" width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 5l7 7m0 0l-7 7m7-7H3" />
+              </svg>
+            )}
           </button>
         </div>
       </div>

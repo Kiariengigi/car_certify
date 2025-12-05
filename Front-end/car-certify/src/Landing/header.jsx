@@ -49,6 +49,11 @@ function Header() {
     if (redirect) navigate('/home');
   };
 
+  const handleSamplereport = () => {
+    localStorage.setItem("numPlate" ,"KCP 999P")
+    navigate("/report")
+  }
+
   // --- Handle Google Success ---
   const handleGoogleSuccess = async (credentialResponse) => {
     try {
@@ -157,7 +162,7 @@ function Header() {
           <Navbar.Collapse id='basic-navbar-nav' className='justify-content-end'>
             <Nav>
               <Nav.Link onClick={() => user ? navigate('/home') : openLoginModal()}>HOME</Nav.Link>
-              <Nav.Link onClick={() => navigate('/report-sample')}>SAMPLE-REPORT</Nav.Link>
+              <Nav.Link onClick={() => handleSamplereport()}>SAMPLE-REPORT</Nav.Link>
               
               <Nav.Link onClick={() => user ? handleLogout() : openLoginModal()}>
                 {user ? 'LOG OUT' : 'LOGIN'}

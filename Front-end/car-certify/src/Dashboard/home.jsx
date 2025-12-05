@@ -6,7 +6,7 @@ function Home(){
     return(
         <>
         <Header/>
-        <Filter/>
+        <Main_Dash />
         </>
     )
 }

@@ -134,6 +134,8 @@ const VehicleReport = () => {
           engine={reportData.engine}
           numberplate={reportData.numPlate}
           rating={reportData.rating}
+          flag={reportData.mileageReports}
+          accidents={reportData.accidents}
         />
         
         <Mileage 
@@ -150,6 +152,7 @@ const VehicleReport = () => {
           year={reportData.year}
           enginecc={reportData.engine_CC}
           fuel={reportData.fuel_Type}
+          accidentreport={reportData.accidents}
         />
 
       </main>

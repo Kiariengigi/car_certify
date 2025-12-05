@@ -4,51 +4,63 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import '../Styles/Filters_styles.css';
 
-function Filters() {
+// Accept the 'onFilterChange' prop
+function Filters({ onFilterChange }) {
   const navigate = useNavigate();
-  const API_URL = "https://car-certify.onrender.com";
+  const API_URL = "http://localhost:3542";
+  const token = localStorage.getItem('token');
 
   const [makes, setMakes] = useState([]);
   const [models, setModels] = useState([]);
-  const [years, setYears] = useState([]);
   
-  const [selectedMake, setSelectedMake] = useState("");
-  const [selectedModel, setSelectedModel] = useState("");
-  const [selectedYear, setSelectedYear] = useState("");
-  const [selectedMileage, setSelectedMileage] = useState("");
-  const [selectedFuel, setSelectedFuel] = useState("");
+  // Local state for the dropdowns
+  const [filters, setFilters] = useState({
+    make: "",
+    model: "",
+    year: "",
+    fuel: ""
+  });
 
+  // 1. Fetch Makes on load
   useEffect(() => {
     const fetchMakes = async () => {
       try {
-        const token = localStorage.getItem('token');
         const res = await axios.get(`${API_URL}/vehicleInfo/makes`, {
           headers: { Authorization: `Bearer ${token}` }
         });
-        setMakes(res.data.data);
-      } catch (err) {
-        console.error(err);
-      }
+        setMakes(res.data.data || []);
+      } catch (err) { console.error("Error loading makes:", err); }
     };
     fetchMakes();
   }, []);
 
-  // Optional: fetch models for selected make
+  // 2. Fetch Models when Make changes
   useEffect(() => {
+    if (!filters.make) {
+      setModels([]); 
+      return;
+    }
     const fetchModels = async () => {
-      if (!selectedMake) return;
       try {
-        const token = localStorage.getItem('token');
-        const res = await axios.get(`${API_URL}/vehicleInfo/models/${selectedMake}`, {
+        const res = await axios.get(`${API_URL}/vehicleInfo/models/${filters.make}`, {
           headers: { Authorization: `Bearer ${token}` }
         });
-        setModels(res.data.data);
-      } catch (err) {
-        console.error(err);
-      }
+        setModels(res.data.data || []);
+      } catch (err) { console.error("Error loading models:", err); }
     };
     fetchModels();
-  }, [selectedMake]);
+  }, [filters.make]);
+
+  // 3. Handle Input Changes
+  const handleInputChange = (field, value) => {
+    const newFilters = { ...filters, [field]: value };
+    setFilters(newFilters);
+    
+    // IMPORTANT: Send the new filters up to Main_Dash
+    if (onFilterChange) {
+      onFilterChange(newFilters);
+    }
+  };
 
   return (
     <section className='p-5'>
@@ -58,18 +70,12 @@ function Filters() {
           <p>Browse Reports</p>
         </div>
         <div className='d-flex gap-3'>
-           <Button 
-          style={{width: '12rem', height: '3rem'}} 
-          onClick={() => navigate('/')} 
-          className='report_btn bg-black border-0'>
-          Generate New Report
-        </Button>
-        <Button 
-          style={{width: '12rem', height: '3rem'}} 
-          onClick={() => navigate('/new')} 
-          className='report_btn bg-black border-0'>
-          Enter New Vehicle
-        </Button>
+          <Button 
+            style={{width: '12rem', height: '3rem'}} 
+            onClick={() => navigate('/new')} 
+            className='report_btn bg-black border-0'>
+            Enter New Vehicle
+          </Button>
         </div>
       </div>
 
@@ -77,8 +83,8 @@ function Filters() {
         {/* Make */}
         <div>
           <p className='text-muted'>Select Make</p>
-          <Form.Select value={selectedMake} onChange={(e) => setSelectedMake(e.target.value)}>
-            <option value="" disabled>E.g. Volkswagen</option>
+          <Form.Select value={filters.make} onChange={(e) => handleInputChange("make", e.target.value)}>
+            <option value="">All Makes</option>
             {makes.map((make, idx) => (
               <option key={idx} value={make}>{make}</option>
             ))}
@@ -88,8 +94,8 @@ function Filters() {
         {/* Model */}
         <div>
           <p className='text-muted'>Select Model</p>
-          <Form.Select value={selectedModel} onChange={(e) => setSelectedModel(e.target.value)}>
-            <option value="" disabled>E.g. Passat</option>
+          <Form.Select value={filters.model} onChange={(e) => handleInputChange("model", e.target.value)}>
+            <option value="">All Models</option>
             {models.map((model, idx) => (
               <option key={idx} value={model}>{model}</option>
             ))}
@@ -99,27 +105,21 @@ function Filters() {
         {/* Year */}
         <div>
           <p className='text-muted'>Select Year</p>
-          <Form.Select value={selectedYear} onChange={(e) => setSelectedYear(e.target.value)}>
-            <option value="" disabled>E.g. 2022</option>
-            {years.map((year, idx) => (
-              <option key={idx} value={year}>{year}</option>
+          <Form.Select value={filters.year} onChange={(e) => handleInputChange("year", e.target.value)}>
+            <option value="">All Years</option>
+            {Array.from({length: 26}, (_, i) => 2025 - i).map(year => (
+               <option key={year} value={year}>{year}</option>
             ))}
-          </Form.Select>
-        </div>
-
-        {/* Mileage */}
-        <div>
-          <p className='text-muted'>Select Mileage</p>
-          <Form.Select value={selectedMileage} onChange={(e) => setSelectedMileage(e.target.value)}>
-            <option value="" disabled>E.g. 100,000KM</option>
           </Form.Select>
         </div>
 
         {/* Fuel */}
         <div>
           <p className='text-muted'>Select Fuel Type</p>
-          <Form.Select value={selectedFuel} onChange={(e) => setSelectedFuel(e.target.value)}>
-            <option value="" disabled>E.g. Diesel</option>
+          <Form.Select value={filters.fuel} onChange={(e) => handleInputChange("fuel", e.target.value)}>
+            <option value="">All Fuel Types</option>
+            <option value="Petrol">Petrol</option>
+            <option value="Diesel">Diesel</option>
           </Form.Select>
         </div>
       </div>

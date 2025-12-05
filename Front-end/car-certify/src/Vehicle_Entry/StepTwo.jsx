@@ -72,7 +72,7 @@ function StepTwo({ data, setData }) {
         <div className="d-none d-md-block border rounded p-3 bg-white shadow-sm">
           <div className="text-uppercase text-muted small fw-semibold">Current Odometer</div>
           <div className="fw-bold fs-4">
-            {currentMileage.toLocaleString()} <span className="fs-6 text-muted">mi</span>
+            {currentMileage.toLocaleString()} <span className="fs-6 text-muted">km</span>
           </div>
         </div>
       </div>

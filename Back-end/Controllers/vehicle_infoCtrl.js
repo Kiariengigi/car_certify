@@ -5,6 +5,27 @@ exports.fetch_decode = async (req, res) => {
 exports.genNewReport = async (req, res) => {
     
 }
+
+exports.getMakes = async (req, res) => {
+  try {
+    // specific logic to get unique makes
+    const makes = await Vehicle.distinct("make");
+    res.status(200).json({ success: true, data: makes });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+exports.getModels = async (req, res) => {
+  try {
+    const { make } = req.params;
+    // Get unique models for the selected make
+    const models = await Vehicle.find({ make: make }).distinct("model");
+    res.status(200).json({ success: true, data: models });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
 exports.retrieve_report = async (req, res) => {
     try{
         const vehicles = await Vehicle.find({user: req.user._id})
@@ -39,6 +60,7 @@ exports.saveVeh = async (req, res) => {
       model: req.body.model,
       year: req.body.year,
       engine: req.body.engine,
+      engineCC: req.body.engineCC,
       fuel: req.body.fuel,
       transmission: req.body.transmission,
       mileageReports,

@@ -28,7 +28,7 @@ const reportSchema = new mongoose.Schema({
     accidents: [],
     engine: String, 
     transmission: String, 
-    engine_CC: String, 
+    engine_CC: Number, 
     fuel_Type: String, 
     user: {
         type: mongoose.Schema.Types.ObjectId,

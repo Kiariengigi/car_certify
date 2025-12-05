@@ -2,8 +2,9 @@ const express = require('express')
 const router = express.Router()
 const upload = require('../middlewares/uploadImage')
 const Vehicle = require('../Models/vehicle')
-const { fetch_decode, retrieve_report, saveVeh, getVehiclesData, getSingleVehicle, getDashboardData} = require('../Controllers/vehicle_infoCtrl')
+const { fetch_decode, retrieve_report, saveVeh, getVehiclesData, getSingleVehicle, getDashboardData, getMakes, getModels} = require('../Controllers/vehicle_infoCtrl')
 const { protect } = require('../middlewares/authmiddleware')
+const { getAllReports } = require('../Controllers/reportCTRL');
 
 // Vehicle routes
 router.post('/decode', fetch_decode)
@@ -12,6 +13,9 @@ router.post('/new', protect, upload.array('image', 5), saveVeh)
 router.get('/vehicles', protect, getVehiclesData)
 router.get('/vehicles/:id', protect, getSingleVehicle)
 router.get("/dashboard", protect, getDashboardData);
+router.get('/makes', protect, getMakes);
+router.get('/reports/all', protect, getAllReports);
+router.get('/models/:make', protect, getModels);
 // routes/vehicleRoutes.js
 router.put('/vehicles/:id', protect, async (req, res) => {
     try {
