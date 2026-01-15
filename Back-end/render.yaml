@@ -1,0 +1,17 @@
+services: 
+  - type: web 
+    name: car-certify_model 
+    runtime: docker 
+    dockerfilePath: ./Models/pythonAPI/Dockerfile 
+    envVars: 
+      - key: PORT
+        value: 8000
+  
+  - type: web
+    name: node-server
+    runtime: docker 
+    dockerfilePath: ./Dockerfile
+    envVars:
+      - key: ML_API_URL
+        value: http://ml-model-service:8000
+  

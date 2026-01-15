@@ -1,0 +1,13 @@
+services:
+  ml-model:
+    build: ./Models/pythonAPI
+    ports: 
+      - "8000:8000"
+  
+  node-server: 
+    build: ./
+    ports: 
+      - "3000:3000"
+    environment: 
+      - ML_API_URL=http://ml-model:8000/predict
+    

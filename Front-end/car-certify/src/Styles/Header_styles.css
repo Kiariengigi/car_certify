@@ -4,3 +4,15 @@
     transition: 0.5s;
     border: 1px solid black;
 }
+
+/* Remove extra space under Navbar */
+nav.navbar {
+  margin-bottom: 0 !important;
+  padding-bottom: 0 !important;
+}
+
+/* Remove top margin from the Hero section */
+.hero-section {
+  margin-top: 0 !important;
+  padding-top: 0 !important;
+}
